@@ -1,0 +1,40 @@
+Mt. Rainier in Washington is one of the most popular mountaineering objectives in the US. It is the tallest mountain in the contiguous US, standing at 14,411ft. Every year around 100 climbers attempt the summit. Typically only 50 of those climbers will be successful, and on average 2 people die every year attempting to climb the mountain. 
+
+Mountaineers have robust and generally accurate techniques for predicting mountain weather. They are able to use large amounts of data from mountain weather stations to cross-reference patterns noticied by previous climbers and locals to determine the safest weather windows to climb during. With high confidence in their weather predictions, mountaineers will only attempt a summit bid if they can summit and return to base well witihn the safe weather window.
+
+I am a rock climber and have noticed that while there is a wealth of weather prediction, there is a lack of computational methods for predicting if your expidition will be successful depending on the weather prediction. Climbers generally avoid percipitation and favor colder weather for better ice conditions and reduced hypothermia risk (counterintuitive, but while climbing, the amount you sweat is often more predictive than temperature). But can we figure out if an expidition will be successful with a high degree of confidence based on numbers, instead of instinct and experience?
+
+I chose to examine data from Mt. Rainier expiditions to explore predicting whether or not an expidtion will be successful based on weather conditions. I found my initial data from Kaggle here: https://www.kaggle.com/codersree/mount-rainier-weather-and-climbing-data. This contains two files, one with data from climbing expiditions, and one with weather data. The data spans from September 2014 through December 2015. 
+
+The columns are: foo
+<table>
+  <tr>
+    <th>Month</th>
+    <th>Savings</th>
+  </tr>
+<table>
+
+Section: Data exploration and preparation
+The first things apparent about this data was that not all of it was necessary, and some could be condensed. Additionally, there was some data I felt could be useful for this classification task that was not included. To address this, I went to the original source for the weather data and downloaded percipitation and snow depth measurements for the time frame. This data included a date, and 5 readings from different sites on the mountain. For both snow and percipition data, only data from two sites (Paradise Base and Sunrise Base) were available, the rest were NA. For percipitation, only one site's data was good. The other site that was not NA was all 0 values except for one day, so would not have been a good predictor. Both data  sets also had many readings per day at 3 hour intervals, so I took the average for each date. 
+
+Looking at the climbing data, I chose to ignore which route was attempted, and also dropped the columns for how many expiditons were attempted that day and what percentage were successful. I condensed the data down to one date per row, and gave it either 0 for "summit bid unsuccessful" and 1 for "summit bid successful". 
+
+Looking at the weather data, I found the voltage did not realte to the weather but was an artefact from the weather station's collection tools so I dropped this column. I joined all four datasets on the date to create my final data.
+
+**** HEAD data ****
+
+One major issue with this data was that there were only 179 total observations. Prediction confidence and accuracy would be very low only using this amount of data. I chose to utilize a technique called Random Over-Sampling Examples (ROSE) that synthesizes new data simulated according to a smoothed-bootstrapped approach. Given a class, ROSE will generate a new set of predictors based off neighbors in the multi-dimensional feature space. I used ROSE to generate a synthetic data set of 3000 observations which I use as training data, and saved my original 179 observations to use as a validation set to determine how successful my approach would be on real-world data. The training data was evenly balanced with 52% of the observations belonging to the positive class. I decided to use a Support-Vector Machine model for this classificaion task. 
+
+
+
+I started by creating a baseline to which I could compare performance. To create this baseline, I used logistic regression, one of the simplest methods for classification. 
+
+
+
+Issues:
+The data does not include any actual rason for a failed expdition. Most often the reason in the real-world is weather. However, Mt. Rainier sees many guided groups of inexperienced climbers, so it is likely some expeditions failed due to a client's lack of fitness or perparation, or some unforseen medical issue. 
+
+The data is already biased towards better weather. Days with weather bad enough for groups to deem the weather unsafe would not factor in to our prediction. 
+
+Although this could be seen as an issue, we could also reword our inital question to "If an expert finds the wheather suitable for a summit bid, can we predict if the bid will be successful using the current weather?" 
+- is this ok to write? does this go against integrity of project? ie changing our question to fit our results
