@@ -263,7 +263,7 @@ server <- function(input, output) {
   })
   
   best.thresh = reactive({
-    coords(svm.roc.obj, x="best", best.method="closest.topleft")
+    coords(svm.roc.obj(), x="best", best.method="closest.topleft")
   })
   
   output$svm.coords <- renderTable({
